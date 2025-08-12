@@ -43,3 +43,5 @@ Thumbs.db
 
 # Claude Code config with secrets
 .claude_config.json
+# Local Netlify folder
+.netlify
