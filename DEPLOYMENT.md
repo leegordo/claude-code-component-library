@@ -1,7 +1,28 @@
 # Claude Code Component Library - Deployment
 
 ## Live Demo
-🚀 **Auto-deployed on**: [Netlify](https://netlify.com) (URL will be provided after setup)
+🚀 **Ready for deployment**: All configuration files are in place for Netlify auto-deployment
+
+## Quick Setup Instructions
+
+### Option 1: Netlify Dashboard (Recommended)
+1. Go to [netlify.com](https://netlify.com) and sign in
+2. Click "New site from Git" 
+3. Connect to GitHub and select `claude-code-component-library` repository
+4. Netlify auto-detects settings from `netlify.toml`:
+   - **Build command**: `npm run build` ✅
+   - **Publish directory**: `dist` ✅
+   - **Node version**: 18 ✅
+5. Click "Deploy site" - Done! 🎉
+
+### Option 2: One-Click Deploy
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/leegordo/claude-code-component-library)
+
+### Auto-Deploy Status
+✅ **Repository**: https://github.com/leegordo/claude-code-component-library  
+✅ **Build Config**: `netlify.toml` configured  
+✅ **Production Build**: Tested and working (`npm run build`)  
+✅ **GitHub Integration**: Ready for continuous deployment
 
 ## Deployment Configuration
 
