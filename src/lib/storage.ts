@@ -1,4 +1,4 @@
-import { ComponentMetadata, GeneratedComponent, ProjectConfig } from '@/types';
+import { GeneratedComponent, ProjectConfig } from '@/types';
 
 const STORAGE_KEYS = {
   COMPONENTS: 'figma-react-components',
