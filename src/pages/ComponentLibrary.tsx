@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, Filter, Eye, Download, Trash2, ExternalLink, Code, Monitor } from 'lucide-react'
+import { Search, Filter, Eye, Download, Trash2, ExternalLink, Code, Monitor, Edit3 } from 'lucide-react'
 import { StorageService } from '@/lib/storage'
 import { GeneratedComponent } from '@/types'
 import { ComponentPreview } from '@/components/ComponentPreview'
@@ -11,6 +11,7 @@ export function ComponentLibrary() {
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [selectedComponent, setSelectedComponent] = useState<GeneratedComponent | null>(null)
   const [viewMode, setViewMode] = useState<'code' | 'preview'>('code')
+  const [editingStatus, setEditingStatus] = useState<string | null>(null)
 
   useEffect(() => {
     setComponents(StorageService.getComponents())
@@ -45,6 +46,31 @@ export function ComponentLibrary() {
     a.click()
     URL.revokeObjectURL(url)
     StorageService.addToHistory('Downloaded component', component.metadata.id)
+  }
+
+  const handleStatusChange = (componentId: string, newStatus: string) => {
+    const updatedComponents = components.map(component => {
+      if (component.metadata.id === componentId) {
+        const updatedComponent = {
+          ...component,
+          metadata: {
+            ...component.metadata,
+            status: newStatus as 'approved' | 'review' | 'draft' | 'deprecated',
+            updatedAt: new Date().toISOString()
+          }
+        }
+        StorageService.saveComponent(updatedComponent)
+        StorageService.addToHistory('Updated status', componentId, { 
+          oldStatus: component.metadata.status, 
+          newStatus 
+        })
+        return updatedComponent
+      }
+      return component
+    })
+    
+    setComponents(updatedComponents)
+    setEditingStatus(null)
   }
 
   return (
@@ -103,17 +129,51 @@ export function ComponentLibrary() {
                     v{component.metadata.version}
                   </p>
                 </div>
-                <span className={clsx(
-                  'px-2 py-1 text-xs rounded-full font-medium',
-                  {
-                    'bg-green-100 text-green-800': component.metadata.status === 'approved',
-                    'bg-yellow-100 text-yellow-800': component.metadata.status === 'review',
-                    'bg-gray-100 text-gray-800': component.metadata.status === 'draft',
-                    'bg-red-100 text-red-800': component.metadata.status === 'deprecated',
-                  }
-                )}>
-                  {component.metadata.status}
-                </span>
+                {editingStatus === component.metadata.id ? (
+                  <select
+                    value={component.metadata.status}
+                    onChange={(e) => handleStatusChange(component.metadata.id, e.target.value)}
+                    onBlur={() => setEditingStatus(null)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape') setEditingStatus(null)
+                      if (e.key === 'Enter') handleStatusChange(component.metadata.id, e.currentTarget.value)
+                    }}
+                    className={clsx(
+                      'px-2 py-1 text-xs rounded-full font-medium border-0 focus:outline-none focus:ring-2 focus:ring-primary-500',
+                      {
+                        'bg-green-100 text-green-800': component.metadata.status === 'approved',
+                        'bg-yellow-100 text-yellow-800': component.metadata.status === 'review', 
+                        'bg-gray-100 text-gray-800': component.metadata.status === 'draft',
+                        'bg-red-100 text-red-800': component.metadata.status === 'deprecated',
+                      }
+                    )}
+                    autoFocus
+                  >
+                    <option value="approved">approved</option>
+                    <option value="review">review</option>
+                    <option value="draft">draft</option>
+                    <option value="deprecated">deprecated</option>
+                  </select>
+                ) : (
+                  <button
+                    onClick={() => setEditingStatus(component.metadata.id)}
+                    className={clsx(
+                      'px-2 py-1 text-xs rounded-full font-medium hover:ring-2 hover:ring-primary-500 hover:ring-opacity-50 transition-all cursor-pointer',
+                      {
+                        'bg-green-100 text-green-800 hover:bg-green-200': component.metadata.status === 'approved',
+                        'bg-yellow-100 text-yellow-800 hover:bg-yellow-200': component.metadata.status === 'review',
+                        'bg-gray-100 text-gray-800 hover:bg-gray-200': component.metadata.status === 'draft',
+                        'bg-red-100 text-red-800 hover:bg-red-200': component.metadata.status === 'deprecated',
+                      }
+                    )}
+                    title="Click to edit status"
+                  >
+                    <span className="flex items-center space-x-1">
+                      <span>{component.metadata.status}</span>
+                      <Edit3 className="h-2.5 w-2.5 opacity-60" />
+                    </span>
+                  </button>
+                )}
               </div>
 
               {component.metadata.description && (
@@ -275,17 +335,70 @@ export function ComponentLibrary() {
                       <div className="flex justify-between">
                         <dt className="text-gray-500">Status:</dt>
                         <dd>
-                          <span className={clsx(
-                            'px-2 py-1 text-xs rounded-full font-medium',
-                            {
-                              'bg-green-100 text-green-800': selectedComponent.metadata.status === 'approved',
-                              'bg-yellow-100 text-yellow-800': selectedComponent.metadata.status === 'review',
-                              'bg-gray-100 text-gray-800': selectedComponent.metadata.status === 'draft',
-                              'bg-red-100 text-red-800': selectedComponent.metadata.status === 'deprecated',
-                            }
-                          )}>
-                            {selectedComponent.metadata.status}
-                          </span>
+                          {editingStatus === `modal-${selectedComponent.metadata.id}` ? (
+                            <select
+                              value={selectedComponent.metadata.status}
+                              onChange={(e) => {
+                                handleStatusChange(selectedComponent.metadata.id, e.target.value)
+                                // Update the selected component to reflect the change
+                                setSelectedComponent(prev => prev ? {
+                                  ...prev,
+                                  metadata: {
+                                    ...prev.metadata,
+                                    status: e.target.value as 'approved' | 'review' | 'draft' | 'deprecated'
+                                  }
+                                } : null)
+                              }}
+                              onBlur={() => setEditingStatus(null)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Escape') setEditingStatus(null)
+                                if (e.key === 'Enter') {
+                                  handleStatusChange(selectedComponent.metadata.id, e.currentTarget.value)
+                                  setSelectedComponent(prev => prev ? {
+                                    ...prev,
+                                    metadata: {
+                                      ...prev.metadata,
+                                      status: e.currentTarget.value as 'approved' | 'review' | 'draft' | 'deprecated'
+                                    }
+                                  } : null)
+                                }
+                              }}
+                              className={clsx(
+                                'px-2 py-1 text-xs rounded-full font-medium border-0 focus:outline-none focus:ring-2 focus:ring-primary-500',
+                                {
+                                  'bg-green-100 text-green-800': selectedComponent.metadata.status === 'approved',
+                                  'bg-yellow-100 text-yellow-800': selectedComponent.metadata.status === 'review', 
+                                  'bg-gray-100 text-gray-800': selectedComponent.metadata.status === 'draft',
+                                  'bg-red-100 text-red-800': selectedComponent.metadata.status === 'deprecated',
+                                }
+                              )}
+                              autoFocus
+                            >
+                              <option value="approved">approved</option>
+                              <option value="review">review</option>
+                              <option value="draft">draft</option>
+                              <option value="deprecated">deprecated</option>
+                            </select>
+                          ) : (
+                            <button
+                              onClick={() => setEditingStatus(`modal-${selectedComponent.metadata.id}`)}
+                              className={clsx(
+                                'px-2 py-1 text-xs rounded-full font-medium hover:ring-2 hover:ring-primary-500 hover:ring-opacity-50 transition-all cursor-pointer',
+                                {
+                                  'bg-green-100 text-green-800 hover:bg-green-200': selectedComponent.metadata.status === 'approved',
+                                  'bg-yellow-100 text-yellow-800 hover:bg-yellow-200': selectedComponent.metadata.status === 'review',
+                                  'bg-gray-100 text-gray-800 hover:bg-gray-200': selectedComponent.metadata.status === 'draft',
+                                  'bg-red-100 text-red-800 hover:bg-red-200': selectedComponent.metadata.status === 'deprecated',
+                                }
+                              )}
+                              title="Click to edit status"
+                            >
+                              <span className="flex items-center space-x-1">
+                                <span>{selectedComponent.metadata.status}</span>
+                                <Edit3 className="h-2.5 w-2.5 opacity-60" />
+                              </span>
+                            </button>
+                          )}
                         </dd>
                       </div>
                       <div className="flex justify-between">
