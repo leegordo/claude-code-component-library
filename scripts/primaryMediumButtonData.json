@@ -1,0 +1,108 @@
+{
+  "metadata": {
+    "id": "primary-medium-button-figma",
+    "name": "PrimaryMediumButton",
+    "description": "Primary Medium Button from Figma Design System with all interactive states (hover, active, disabled, loading, variants)",
+    "figmaUrl": "https://www.figma.com/design/FtPOHfg0X15gaSdlOpeeFF/Design-System?node-id=185-852",
+    "createdAt": "2025-08-12T00:47:27.370Z",
+    "updatedAt": "2025-08-12T00:47:27.371Z",
+    "version": "1.0.0",
+    "author": "Figma Design System",
+    "tags": [
+      "button",
+      "primary",
+      "medium",
+      "interactive",
+      "states",
+      "figma"
+    ],
+    "framework": "react",
+    "status": "approved",
+    "figmaNodeId": "185:852",
+    "designSystemSource": true
+  },
+  "code": "import React from 'react';\nimport { cn } from '@/lib/utils';\nimport { Loader2 } from 'lucide-react';\n\ninterface PrimaryMediumButtonProps {\n  children: React.ReactNode;\n  onClick?: () => void;\n  disabled?: boolean;\n  loading?: boolean;\n  className?: string;\n  type?: 'button' | 'submit' | 'reset';\n  variant?: 'default' | 'destructive' | 'outline' | 'ghost';\n  size?: 'sm' | 'md' | 'lg';\n  fullWidth?: boolean;\n}\n\nexport function PrimaryMediumButton({ \n  children, \n  onClick, \n  disabled = false,\n  loading = false,\n  className,\n  type = 'button',\n  variant = 'default',\n  size = 'md',\n  fullWidth = false,\n  ...props \n}: PrimaryMediumButtonProps) {\n  const isDisabled = disabled || loading;\n\n  return (\n    <button \n      type={type}\n      className={cn(\n        // Base styles - following your design system\n        \"inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 ease-in-out\",\n        \"focus:outline-none focus:ring-2 focus:ring-offset-2\",\n        \"active:transform active:scale-95\",\n        \n        // Size variants - Medium as default from Figma\n        {\n          'px-md py-xs text-sm h-8': size === 'sm',\n          'px-lg py-md text-base h-10': size === 'md', // Primary Medium from Figma\n          'px-xl py-lg text-lg h-12': size === 'lg',\n        },\n        \n        // Variant styles - using your extracted design tokens\n        {\n          // Default Primary - Black button from your design system\n          'bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-950 focus:ring-gray-900': \n            variant === 'default' && !isDisabled,\n          'bg-gray-300 text-gray-500 cursor-not-allowed': \n            variant === 'default' && isDisabled,\n            \n          // Destructive variant\n          'bg-error-600 text-white hover:bg-error-700 active:bg-error-800 focus:ring-error-600': \n            variant === 'destructive' && !isDisabled,\n          'bg-error-300 text-error-500 cursor-not-allowed': \n            variant === 'destructive' && isDisabled,\n            \n          // Outline variant\n          'border-2 border-gray-900 text-gray-900 bg-white hover:bg-gray-50 active:bg-gray-100 focus:ring-gray-900': \n            variant === 'outline' && !isDisabled,\n          'border-2 border-gray-300 text-gray-400 bg-white cursor-not-allowed': \n            variant === 'outline' && isDisabled,\n            \n          // Ghost variant\n          'text-gray-900 bg-transparent hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-900': \n            variant === 'ghost' && !isDisabled,\n          'text-gray-400 bg-transparent cursor-not-allowed': \n            variant === 'ghost' && isDisabled,\n        },\n        \n        // Full width\n        {\n          'w-full': fullWidth,\n        },\n        \n        className\n      )}\n      onClick={onClick}\n      disabled={isDisabled}\n      {...props}\n    >\n      {loading && (\n        <Loader2 className=\"mr-2 h-4 w-4 animate-spin\" />\n      )}\n      {children}\n    </button>\n  );\n}\n\nexport default PrimaryMediumButton;",
+  "assets": [],
+  "dependencies": [
+    "react",
+    "clsx",
+    "lucide-react"
+  ],
+  "documentation": {
+    "props": [
+      {
+        "name": "children",
+        "type": "React.ReactNode",
+        "required": true,
+        "description": "Button content/text"
+      },
+      {
+        "name": "variant",
+        "type": "'default' | 'destructive' | 'outline' | 'ghost'",
+        "required": false,
+        "default": "default",
+        "description": "Button style variant - default uses design system black"
+      },
+      {
+        "name": "size",
+        "type": "'sm' | 'md' | 'lg'",
+        "required": false,
+        "default": "md",
+        "description": "Button size - md matches Figma Primary Medium"
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "description": "Disabled state with proper styling"
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "description": "Loading state with spinner icon"
+      },
+      {
+        "name": "fullWidth",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "description": "Full width button"
+      },
+      {
+        "name": "onClick",
+        "type": "() => void",
+        "required": false,
+        "description": "Click handler function"
+      }
+    ],
+    "examples": [
+      {
+        "name": "Default State",
+        "code": "<PrimaryMediumButton>Default Button</PrimaryMediumButton>"
+      },
+      {
+        "name": "Disabled State",
+        "code": "<PrimaryMediumButton disabled>Disabled Button</PrimaryMediumButton>"
+      },
+      {
+        "name": "Loading State",
+        "code": "<PrimaryMediumButton loading>Loading Button</PrimaryMediumButton>"
+      },
+      {
+        "name": "Destructive Variant",
+        "code": "<PrimaryMediumButton variant=\"destructive\">Delete</PrimaryMediumButton>"
+      },
+      {
+        "name": "Outline Variant",
+        "code": "<PrimaryMediumButton variant=\"outline\">Outline Button</PrimaryMediumButton>"
+      },
+      {
+        "name": "Ghost Variant",
+        "code": "<PrimaryMediumButton variant=\"ghost\">Ghost Button</PrimaryMediumButton>"
+      }
+    ]
+  }
+}
